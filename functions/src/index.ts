@@ -6,6 +6,7 @@ import { TData, TMeasurement } from './types'
 
 //----------------------------------------------------
 admin.initializeApp()
+const MAX_LOG_COUNT = 8600
 
 //----------------------------------------------------
 export const onDataUpdate = functions.database
@@ -25,41 +26,40 @@ export const onDataUpdate = functions.database
     }
   })
 
-const updateSensor = (deviceID: string, timestamp: string, values: any) => {
+const updateSensor = async (deviceID: string, timestamp: string, values: any) => {
   return admin
     .database()
-    .ref('/history')
+    .ref('/history/' + deviceID)
     .once('value')
     .then(snapshot => {
-      if (snapshot.hasChild(deviceID)) {
-        const deviceHistory = snapshot.child(deviceID).val()
-        console.log('Device History: ', deviceHistory)
+      let newDeviceHistory: any = {}
+      if (snapshot.hasChildren()) {
+        // History for the Device already exists
+        const oldDeviceHistory = snapshot.val()
+        console.log('Device History: ', oldDeviceHistory)
 
-        let newDeviceHistory: any = {}
         Object.keys(values).forEach((key: string) => {
-          console.log('Current Key: ', key)
-          const historyForKey: Array<TMeasurement> = deviceHistory.child(key).val()
-          console.log('History for Key: ', historyForKey)
+          const historyForKey: Array<TMeasurement> = oldDeviceHistory[key]
+          console.log(`History for ${key}: `, historyForKey)
+
+          if (historyForKey.length > MAX_LOG_COUNT) historyForKey.splice(0, historyForKey.length)
 
           historyForKey.push({ timestamp: timestamp, value: values[key] })
-          newDeviceHistory = { ...newDeviceHistory, key: historyForKey }
+          newDeviceHistory = { ...newDeviceHistory, [key]: historyForKey }
         })
-
-        console.log('New Device-History after Adding: ', newDeviceHistory)
-        return snapshot.ref.child(deviceID).update(newDeviceHistory)
       } else {
-        let newDeviceHistory: any = {}
+        // no History logged for the device
         Object.keys(values).forEach((key: string) => {
           console.log('Current Key: ', key)
 
           newDeviceHistory = {
             ...newDeviceHistory,
-            key: [{ timestamp: timestamp, value: values[key] }]
+            [key]: [{ timestamp: timestamp, value: values[key] }]
           }
         })
-
-        console.log('New Device-History after Adding: ', newDeviceHistory)
-        return snapshot.ref.child(deviceID).set(newDeviceHistory)
       }
+
+      console.log('New Device-History after Adding: ', newDeviceHistory)
+      return snapshot.ref.update(newDeviceHistory)
     })
 }
