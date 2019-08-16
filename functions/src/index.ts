@@ -4,9 +4,11 @@ import * as admin from 'firebase-admin'
 // Types
 import { TData, TMeasurement } from './types'
 
+// Utility
+import { isToday, getCurrentTime } from './utility'
 //----------------------------------------------------
 admin.initializeApp()
-const MAX_LOG_COUNT = 8600
+const MAX_LOG_COUNT = 3000
 
 //----------------------------------------------------
 export const onDataUpdate = functions.database
@@ -17,6 +19,9 @@ export const onDataUpdate = functions.database
 
     console.log('Change happened to Device with ID: ', deviceID)
     console.log('After Object: ', after)
+
+    if (!isToday(after.lastUpdated))
+      return change.after.ref.update({ lastUpdated: getCurrentTime() })
 
     switch (after.type) {
       case 'sensor':
