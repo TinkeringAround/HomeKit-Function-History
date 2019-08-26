@@ -9,7 +9,7 @@ import { isToday, getCurrentTime } from './utility'
 
 //----------------------------------------------------
 admin.initializeApp()
-const MAX_LOG_COUNT = 3000
+const MAX_LOG_COUNT = 300
 
 //----------------------------------------------------
 export const onDataUpdate = functions.database
