@@ -52,7 +52,7 @@ const updateSensor = async (deviceID: string, timestamp: string, values: any) =>
         Object.keys(values).forEach((key: string) => {
           const dataForKey: Array<TMeasurement> = oldData[key]
 
-          if (dataForKey.length > MAX_LOG_COUNT) dataForKey.splice(0, dataForKey.length)
+          if (dataForKey.length > MAX_LOG_COUNT) dataForKey.splice(0, 1)
 
           dataForKey.push({ timestamp: timestamp, value: values[key] })
           newDeviceData = { ...newDeviceData, [key]: dataForKey }
