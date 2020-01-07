@@ -18,7 +18,7 @@ export const onDataUpdate = functions.database
     const deviceID = context.params.deviceID
     const after: TDevice = change.after.val()
 
-    console.log('Durchlauf zum Zeitpunkt ' + getCurrentTime() + ': ', {
+    console.log('Excecution Time: ' + getCurrentTime() + ': ', {
       deviceID: deviceID,
       afterObject: after,
       isToday: isToday(after.lastUpdated)
