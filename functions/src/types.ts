@@ -3,11 +3,15 @@ export type TDevice = {
   name: string
   lastUpdated: string
   battery: number
-  type: string
+  type: TDeviceType
   values: any
 }
 
+//--------------------------------------------------------
 export type TMeasurement = {
   timestamp: string
   value: string
 }
+
+//--------------------------------------------------------
+export type TDeviceType = 'sensor'
